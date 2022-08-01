@@ -1,0 +1,1 @@
+python logic_bert/evaluate.py --data_file logic_bert/test_examples.json --vocab_file sample/vocab.txt

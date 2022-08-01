@@ -1,0 +1,1 @@
+python sample/sample.py --vocab_file sample/vocab.txt --output_file DATA/LP_STAR/test.txt --example_num 2000 --max_pred_num 30 --min_pred_num 10 --algo LP_STAR --balance_by_depth --max_depth 6
