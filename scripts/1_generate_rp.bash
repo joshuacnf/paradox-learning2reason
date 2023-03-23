@@ -6,6 +6,4 @@ do
    python sample/sample.py --vocab_file sample/vocab.txt --output_file $FOLDER/prop_examples_$number.txt --min_pred_num 5 --max_pred_num 30 --algo RP --example_num 1000 --balance_by_depth --max_depth 6 & 
 done
 wait
-python dataset.py --file_name $FOLDER/prop_examples_INDEX.txt --file_range 40 --max_depth_during_train 6 --final_file_name $FOLDER/prop_examples.balanced_by_backward.max_6.json --control_num 1000 --depth backward_depth
-
-# python sample/sample.py --vocab_file sample/vocab.txt --output_file logic_bert/test_examples.txt --min_pred_num 5 --max_pred_num 30 --algo RP --example_num 100 --balance_by_depth --max_depth 10
+python dataset.py --file_name $FOLDER/prop_examples_INDEX.txt --file_range 40 --max_depth_during_train 6 --final_file_name $FOLDER/prop_examples.balanced_by_backward.max_6.json --control_num 1000 --depth depth
