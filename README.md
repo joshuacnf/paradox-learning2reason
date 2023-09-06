@@ -7,7 +7,9 @@ This repo provides code for reproducing the experiments in the paper [On the Par
 
 ## Environment
 
-Our code primarily uses PyTorch and transformers. For reproducibility, below are the commands we used to setup the environment with docker. **However, it should run okay with most versions of Pytorch and transformers.**
+Our code primarily uses PyTorch and transformers. For reproducibility, below are the commands we used to setup the environment with docker. **However, it should run okay with most versions of PyTorch and transformers.** 
+
+**Note: not compatible with PyTorch 2.X**
 
 ```
 docker run --privileged --name logic --rm -it --runtime=nvidia --ipc=host pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
