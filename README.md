@@ -7,7 +7,7 @@ This repo provides code for reproducing the experiments in the paper [On the Par
 
 ## Environment
 
-Our code primarily uses PyTorch and transformers. For reproducibility, below are the commands we used to setup the environment with docker. **However, it should run okay with most versions of PyTorch (1.X) and transformers.** 
+Our code primarily uses PyTorch and transformers. For reproducibility, below are the commands we used to setup the environment with docker. **However, it should run okay with most versions of PyTorch (e.g., 1.6.0) and transformers.** 
 
 **Note: not compatible with PyTorch 2.X**
 
