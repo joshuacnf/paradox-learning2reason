@@ -27,7 +27,7 @@ pip install yacs easydict pillow commentjson attrdict boto3 requests scikit-lear
 In Section 2.2, we provided a hand-crafted set of parameters for the BERT model (LogicBERT) which solves all examples in SimpleLogic perfectly. We provide an implementation in this repo. To evaluate the model, run the following script.
 
 ```
-bash scripts/9_eval_logic_bert.sh
+bash scripts/9_eval_logic_bert.bash
 ```
 
 
