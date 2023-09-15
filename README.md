@@ -1,6 +1,6 @@
 # On the Paradox of Learning to Reason from Data
 
-This repo provides code for reproducing the experiments in the paper [On the Paradox of Learning to Reason from Data]([http://web.cs.ucla.edu/~hzhang19/publication/paradox-learn2reason/paradox-learn2reason.pdf](http://web.cs.ucla.edu/~hzhang19/files/on-the-paradox.pdf)). We provide code for
+This repo provides code for reproducing the experiments in the paper [On the Paradox of Learning to Reason from Data](http://web.cs.ucla.edu/~hzhang19/files/on-the-paradox.pdf). We provide code for
  - Implementation of a BERT model parameterization which solves SimpleLogic (LogicBERT)
  - Sampling examples from SimpleLogic
  - Training BERT / T5 on SimpleLogic examples
