@@ -7,15 +7,15 @@ class ParseLayer(nn.Module):
         super().__init__()
 
         V, K, Q = self.compute_attention_matrix(alpha)
-        self.V = nn.Parameter(V, requires_grad=False)
-        self.K = nn.Parameter(K, requires_grad=False)
-        self.Q = nn.Parameter(Q, requires_grad=False)
+        self.V = nn.Parameter(V, requires_grad=True)
+        self.K = nn.Parameter(K, requires_grad=True)
+        self.Q = nn.Parameter(Q, requires_grad=True)
 
         W1, b1, W2, b2 = self.compute_mlp_matrix()
-        self.W1 = nn.Parameter(W1, requires_grad=False)
-        self.b1 = nn.Parameter(b1, requires_grad=False)
-        self.W2 = nn.Parameter(W2, requires_grad=False)
-        self.b2 = nn.Parameter(b2, requires_grad=False)
+        self.W1 = nn.Parameter(W1, requires_grad=True)
+        self.b1 = nn.Parameter(b1, requires_grad=True)
+        self.W2 = nn.Parameter(W2, requires_grad=True)
+        self.b2 = nn.Parameter(b2, requires_grad=True)
 
     def forward(self, input_states):
         # attention
@@ -220,18 +220,18 @@ class ReasonLayer(nn.Module):
         super().__init__()
 
         Q, K, V, b_Q, b_K, b_V = self.compute_attention_matrix(alpha)
-        self.Q = nn.Parameter(Q, requires_grad=False)
-        self.K = nn.Parameter(K, requires_grad=False)
-        self.V = nn.Parameter(V, requires_grad=False)
-        self.b_Q = nn.Parameter(b_Q, requires_grad=False)
-        self.b_K = nn.Parameter(b_K, requires_grad=False)
-        self.b_V = nn.Parameter(b_V, requires_grad=False)
+        self.Q = nn.Parameter(Q, requires_grad=True)
+        self.K = nn.Parameter(K, requires_grad=True)
+        self.V = nn.Parameter(V, requires_grad=True)
+        self.b_Q = nn.Parameter(b_Q, requires_grad=True)
+        self.b_K = nn.Parameter(b_K, requires_grad=True)
+        self.b_V = nn.Parameter(b_V, requires_grad=True)
 
         W1, b1, W2, b2 = self.compute_mlp_matrix()
-        self.W1 = nn.Parameter(W1, requires_grad=False)
-        self.b1 = nn.Parameter(b1, requires_grad=False)
-        self.W2 = nn.Parameter(W2, requires_grad=False)
-        self.b2 = nn.Parameter(b2, requires_grad=False)
+        self.W1 = nn.Parameter(W1, requires_grad=True)
+        self.b1 = nn.Parameter(b1, requires_grad=True)
+        self.W2 = nn.Parameter(W2, requires_grad=True)
+        self.b2 = nn.Parameter(b2, requires_grad=True)
 
     def forward(self, input_states):
         Q, K, V = self.Q, self.K, self.V
@@ -342,7 +342,7 @@ class LogicBERT(nn.Module):
         super().__init__()
 
         self.parse_layer = ParseLayer()
-        reason_layers = [(str(i), ReasonLayer()) for i in range(11)]
+        reason_layers = [(str(i), ReasonLayer()) for i in range(7)]# was 11
         self.reason_layers = nn.Sequential(OrderedDict(reason_layers))
 
     def forward(self, input_states):
