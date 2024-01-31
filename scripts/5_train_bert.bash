@@ -21,6 +21,7 @@ CUDA_VISIBLE_DEVICES=$1 python -m torch.distributed.launch --master_port=$3 --np
     --seed 10 \
     --output_dir $4 \
     --change_positional_embedding_after_loading \
+    --no_cuda \
     ${@:5}
 
 
