@@ -12,17 +12,21 @@ from tqdm import tqdm
 from model import LogicBERT
 
 device = 'cpu'
+RULES_THRESHOLD = 20
 
 class LogicDataset(Dataset):
     def __init__(self, examples):
-        self.examples = examples
+        #self.examples = examples
+
+        # skip examples that have too many rules
+        self.examples = [ex for ex in examples if len(ex["rules"]) <= RULES_THRESHOLD]
         random.shuffle(self.examples)
 
     def __len__(self):
         return len(self.examples)
 
     def __getitem__(self, index):
-        example = self.examples[index]
+        example = self.examples[index]       
 
         # [CLS] Query : Alice is C . A . C . A and B , C .
         text = ""
@@ -83,6 +87,7 @@ def init():
     parser.add_argument('--max_cluster_size', default=10, type=int)
     parser.add_argument('--log_file', default='log.txt', type=str)
     parser.add_argument('--output_model_file', default='model.pt', type=str)
+    parser.add_argument('--max_rules', default=20, type=int)
     
     args = parser.parse_args()
 
@@ -220,18 +225,20 @@ def train_model(model, train, valid, test,
             print('Dataset {}; Epoch {}, Batch Loss: {}'.format(dataset_name, epoch, loss.item()))
 
         # compute likelihood on train, valid and test
-        train_ll = avg_ll(model, train_loader)
-        valid_ll = avg_ll(model, valid_loader)
-        test_ll = avg_ll(model, test_loader)
+        
+        #train_ll = avg_ll(model, train_loader)
+        #valid_ll = avg_ll(model, valid_loader)
+        #test_ll = avg_ll(model, test_loader)
 
-        print('Dataset {}; Epoch {}; train ll: {}; valid ll: {}; test ll: {}'.format(dataset_name, epoch, train_ll, valid_ll, test_ll))
+        #print('Dataset {}; Epoch {}; train ll: {}; valid ll: {}; test ll: {}'.format(dataset_name, epoch, train_ll, valid_ll, test_ll))
 
-        with open(log_file, 'a+') as f:
-            f.write('{} {} {} {}\n'.format(epoch, train_ll, valid_ll, test_ll))
+        #with open(log_file, 'a+') as f:
+        #    f.write('{} {} {} {}\n'.format(epoch, train_ll, valid_ll, test_ll))
 
-        if output_model_file != '' and valid_ll > max_valid_ll:
-            torch.save(model, output_model_file)
-            max_valid_ll = valid_ll
+        #if output_model_file != '' and valid_ll > max_valid_ll:
+        #    torch.save(model, output_model_file)
+        #    max_valid_ll = valid_ll
+        
 
 def main():
     args = init()
