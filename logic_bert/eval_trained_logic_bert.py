@@ -137,103 +137,21 @@ def tokenize_and_embed(sentence, word_emb, position_emb):
     
 
 # based on PGC repo: pgc/train.py
-def train_model(model, train, valid, test,
+def test_model(model, test,
                 lr, weight_decay, batch_size, max_epoch,
                 log_file, output_model_file, dataset_name, word_emb, position_emb):
-    valid_loader, test_loader = None, None
-    train_loader = DataLoader(dataset=train, batch_size=batch_size, shuffle=True)
-    if valid is not None:
-        valid_loader = DataLoader(dataset=valid, batch_size=batch_size, shuffle=True)
-    if test is not None:
-        test_loader = DataLoader(dataset=test, batch_size=batch_size, shuffle=True)
-
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    
+    test_loader = DataLoader(dataset=test, batch_size=batch_size, shuffle=True)
 
     # training loop
-    max_valid_ll = -1.0e7
     model = model.to(device)
-    model.train()
-    for epoch in range(0, max_epoch):
-        print('Epoch: {}'.format(epoch))
+    # compute accuracy on train, valid and test
+    test_acc = evaluate(model, test_loader, word_emb, position_emb)
 
-        # step in train
-        batch_counter = 0
-        for x_batch, labels, something_else_lol in train_loader:
-            # temporary mini-train
-            # if batch_counter > 10:
-            #     break
+    print('test acc: {}'.format(test_acc))
 
-            # gpu 
-            #x_batch = x_batch.to(device)
-
-            # forward passes
-            y_batch = []
-            optimizer.zero_grad()
-            for sentence in x_batch:
-                input_state = tokenize_and_embed(sentence, word_emb, position_emb)
-                m_out = model(input_state)
-                y = m_out[0, 255]
-                # print(y.item()) # print logit value
-                y_batch.append(y)
-            y_batch = torch.stack(y_batch, dim=0)
-            
-            y_batch = y_batch.type(torch.FloatTensor)
-            labels = labels.type(torch.FloatTensor)
-
-            torch.log(y_batch)
-            torch.log(y_batch)
-
-            # print(y_batch)
-            # print(labels)
-
-            bce = torch.nn.BCEWithLogitsLoss() #get the BCE loss function
-            loss = bce(y_batch, labels) #compute loss
-
-            # ####
-            # # temporarily make the params retain their gradients so we can view em
-            # for name, param in model.named_parameters():
-            #     param.retain_grad()
-            # ####
-
-            loss.backward()#back propogate (compute gradients)
-            optimizer.step()#update parameters according to this batch's gradients
-
-            # debugging prints:
-            print_nonzero_params = False
-            print_gradients = False
-
-            if print_nonzero_params:
-                # show (nonzero) parameters (to see if they are like the times (a changin))
-                for name, param in model.named_parameters():
-                    if param.requires_grad:
-                        #print(name, param.data)#just print all the params
-                        nonzero_mask = torch.ne(param.data, 0)
-                        nonzero_entries = torch.masked_select(param.data, nonzero_mask)
-                        print(name, nonzero_entries.data)
-
-            if print_gradients:
-                # print gradients but only for the leaf nodes (where they should be stored after backward())
-                for name, param in model.named_parameters():
-                    if param.requires_grad and param.is_leaf:
-                        print(param.grad)
-
-            print('Epoch {}, Batch Loss: {}'.format(epoch, loss.item()))
-
-            batch_counter += 1
-
-        # compute accuracy on train, valid and test
-        train_acc = evaluate(model, train_loader, word_emb, position_emb)
-        valid_acc = evaluate(model, valid_loader, word_emb, position_emb)
-        test_acc = evaluate(model, test_loader, word_emb, position_emb)
-
-        print('Epoch {}; train acc: {}; valid acc: {}; test acc: {}'.format(epoch, train_acc, valid_acc, test_acc))
-
-        with open(log_file, 'a+') as f:
-            f.write('{} {} {} {}\n'.format(epoch, train_acc, valid_acc, test_acc))
-
-        if output_model_file != '':# and valid_ll > max_valid_ll:
-            torch.save(model, output_model_file)
-            #max_valid_ll = valid_ll
+    with open(log_file, 'a+') as f:
+        f.write('{} {} {} {}\n'.format(test_acc))
 
 
 def evaluate(model, dataset_loader, word_emb, position_emb):
@@ -268,20 +186,20 @@ def main():
     #dataset = LogicDataset.initialze_from_file(args.data_file)
     #train, valid, test = dataset.split_dataset()
 
-    train = LogicDataset.initialze_from_file(args.data_file+'_train')
-    valid = LogicDataset.initialze_from_file(args.data_file+'_val')
     test = LogicDataset.initialze_from_file(args.data_file+'_test')
     
     vocab = read_vocab(args.vocab_file)
     word_emb = gen_word_embedding(vocab)
     position_emb = gen_position_embedding(1024)
 
-    model = LogicBERT()
+    #model = LogicBERT()
+    #model.load_state_dict(torch.load('/space/oliver/paradox-learning2reason/OUTPUT/LP/LOGIC_BERT/model.pt'))
+    model = torch.load('/space/oliver/paradox-learning2reason/OUTPUT/LP/LOGIC_BERT/model.pt')
     model.to(device)
 
     #train, valid, test = load_data(args.dataset_path, args.dataset)
 
-    train_model(model, train=train, valid=valid, test=test,
+    test_model(model, test=test,
         lr=args.lr, weight_decay=args.weight_decay,
         batch_size=args.batch_size, max_epoch=args.max_epoch,
         log_file=args.log_file, output_model_file=args.output_model_file,
