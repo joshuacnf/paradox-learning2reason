@@ -12,7 +12,7 @@ from tqdm import tqdm
 from model import LogicBERT
 
 device = 'cpu'
-RULES_THRESHOLD = 20
+RULES_THRESHOLD = 30
 
 class LogicDataset(Dataset):
     def __init__(self, examples):
@@ -83,7 +83,6 @@ def init():
     parser.add_argument('--batch_size', default=8, type=int)
     parser.add_argument('--lr', default=0.001, type=float)
     parser.add_argument('--weight_decay', default=1.0, type=float)
-    parser.add_argument('--component_num', default=10, type=int)
     parser.add_argument('--max_cluster_size', default=10, type=int)
     parser.add_argument('--log_file', default='log.txt', type=str)
     parser.add_argument('--output_model_file', default='model.pt', type=str)
@@ -156,7 +155,7 @@ def train_model(model, train, valid, test,
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     # training loop
-    max_valid_ll = -1.0e7
+    #max_valid_ll = -1.0e7
     model = model.to(device)
     model.train()
     for epoch in range(0, max_epoch):
@@ -166,7 +165,7 @@ def train_model(model, train, valid, test,
         for x_batch, labels, something_else_lol in train_loader:
             
             # sanity check
-            assert batch_size == len(x_batch)
+            #assert batch_size == len(x_batch)
 
             # gpu 
             #x_batch = x_batch.to(device)
@@ -222,23 +221,41 @@ def train_model(model, train, valid, test,
                     if param.requires_grad and param.is_leaf:
                         print(param.grad)
 
-            print('Dataset {}; Epoch {}, Batch Loss: {}'.format(dataset_name, epoch, loss.item()))
+            print('Epoch {}, Batch Loss: {}'.format(epoch, loss.item()))
 
-        # compute likelihood on train, valid and test
+        # compute accuracy on train, valid and test
+        train_acc = evaluate(model, train_loader, word_emb, position_emb)
+        valid_acc = evaluate(model, valid_loader, word_emb, position_emb)
+        test_acc = evaluate(model, test_loader, word_emb, position_emb)
         
-        #train_ll = avg_ll(model, train_loader)
-        #valid_ll = avg_ll(model, valid_loader)
-        #test_ll = avg_ll(model, test_loader)
 
-        #print('Dataset {}; Epoch {}; train ll: {}; valid ll: {}; test ll: {}'.format(dataset_name, epoch, train_ll, valid_ll, test_ll))
+        print('Epoch {}; train acc: {}; valid acc: {}; test acc: {}'.format(epoch, train_acc, valid_acc, test_acc))
 
-        #with open(log_file, 'a+') as f:
-        #    f.write('{} {} {} {}\n'.format(epoch, train_ll, valid_ll, test_ll))
+        with open(log_file, 'a+') as f:
+            f.write('{} {} {} {}\n'.format(epoch, train_acc, valid_acc, test_acc))
 
-        #if output_model_file != '' and valid_ll > max_valid_ll:
-        #    torch.save(model, output_model_file)
-        #    max_valid_ll = valid_ll
-        
+        if output_model_file != '':
+            torch.save(model, output_model_file)
+
+
+def evaluate(model, dataset_loader, word_emb, position_emb):
+    accs = []
+    dataset_len = 0
+    counter = 0
+    for x_batch, labels, something_else_lol in dataset_loader:
+        batch_correct = 0
+        batch_total = 0
+        for sentence,label in zip(x_batch,labels):
+            input_state = tokenize_and_embed(sentence, word_emb, position_emb)
+            m_out = model(input_state)
+            y = m_out[0, 255]
+            correct_prediction = ((y>.5) == label)
+            accs.append(correct_prediction)
+            batch_correct += correct_prediction
+            batch_total += 1
+    acc = sum(accs) / len(accs)
+    return acc
+
 
 def main():
     args = init()

@@ -1,4 +1,5 @@
 import torch
+torch.cuda.empty_cache()#oliver is to be blamed for this
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
@@ -11,7 +12,7 @@ from tqdm import tqdm
 from model import LogicBERT
 
 device = 'cpu'
-RULES_THRESHOLD = 60
+RULES_THRESHOLD = 30
 
 class LogicDataset(Dataset):
     def __init__(self, examples):
@@ -54,7 +55,12 @@ class LogicDataset(Dataset):
         for file_name in files:
             with open(file_name) as f:
                 examples = json.load(f)
-                all_examples.extend(examples)
+                for example in examples:
+                    if example['depth'] < 6:
+                        all_examples.extend([example])
+            # with open(file_name) as f:
+            #     examples = json.load(f)
+            #     all_examples.extend(examples)
         return cls(all_examples)
 
 
@@ -63,11 +69,23 @@ def init():
 
     parser = argparse.ArgumentParser()
 
+    # was already here
     parser.add_argument('--data_file', type=str,)
     parser.add_argument('--vocab_file', type=str, default='vocab.txt')
     parser.add_argument('--device', default='cuda', type=str)
     parser.add_argument('--cuda_core', default='0', type=str)
-
+    
+    # oliver added
+    parser.add_argument('--dataset_path', default='', type=str)
+    parser.add_argument('--dataset', default='', type=str) 
+    parser.add_argument('--max_epoch', default=20, type=int)
+    parser.add_argument('--batch_size', default=8, type=int)
+    parser.add_argument('--lr', default=0.001, type=float)
+    parser.add_argument('--weight_decay', default=1.0, type=float)
+    parser.add_argument('--max_cluster_size', default=10, type=int)
+    parser.add_argument('--log_file', default='log.txt', type=str)
+    parser.add_argument('--output_model_file', default='model.pt', type=str)
+    
     args = parser.parse_args()
 
     device = args.device
@@ -119,20 +137,78 @@ def tokenize_and_embed(sentence, word_emb, position_emb):
     for i, word in enumerate(seq):
         x[i, :] = torch.cat((torch.zeros(64 * 8).to(device), word_emb[word], torch.zeros(64 * 3).to(device))) + position_emb[i]
     return x
+    
 
+# based on PGC repo: pgc/train.py
+def test_model(model, test,
+                lr, weight_decay, batch_size, max_epoch,
+                log_file, output_model_file, dataset_name, word_emb, position_emb):
+    
+    test_loader = DataLoader(dataset=test, batch_size=batch_size, shuffle=True)
+
+    # training loop
+    model = model.to(device)
+    # compute accuracy on train, valid and test
+    test_acc = evaluate(model, test_loader, word_emb, position_emb)
+
+    print('test acc: {}'.format(test_acc))
+
+    with open(log_file, 'a+') as f:
+        f.write('{} {} {} {}\n'.format(test_acc))
+
+
+def evaluate(model, dataset_loader, word_emb, position_emb):
+    accs = []
+    dataset_len = 0
+    counter = 0
+    for x_batch, labels, something_else_lol in dataset_loader:
+        # counter += 1
+        # if counter > 10:
+        #     break
+        #x_batch = x_batch.to(device)
+        #y_batch = []
+        batch_correct = 0
+        batch_total = 0
+        for sentence,label in zip(x_batch,labels):
+            input_state = tokenize_and_embed(sentence, word_emb, position_emb)
+            m_out = model(input_state)
+            y = m_out[0, 255]
+            # print(y.item()) # print logit value
+            #y_batch.append(y)
+            correct_prediction = ((y>.5) == label)
+            accs.append(correct_prediction)
+            batch_correct += correct_prediction
+            batch_total += 1
+        #print('evaluation batch accuracy: {}'.format(batch_correct/batch_total))
+    acc = sum(accs) / len(accs)
+    return acc
 
 def main():
     args = init()
 
-    val_dataset = LogicDataset.initialze_from_file(args.data_file)
+    #dataset = LogicDataset.initialze_from_file(args.data_file)
+    #train, valid, test = dataset.split_dataset()
+
+    test = LogicDataset.initialze_from_file(args.data_file+'_test')
     
     vocab = read_vocab(args.vocab_file)
     word_emb = gen_word_embedding(vocab)
     position_emb = gen_position_embedding(1024)
 
-    model = LogicBERT()
+    #model = LogicBERT()
+    #model.load_state_dict(torch.load('/space/oliver/paradox-learning2reason/OUTPUT/LP/LOGIC_BERT/model.pt'))
+    model = torch.load('/space/trzhao/paradox-learning2reason/OUTPUT/LP/LOGIC_BERT/model.pt')
     model.to(device)
 
+    #train, valid, test = load_data(args.dataset_path, args.dataset)
+
+    test_model(model, test=test,
+        lr=args.lr, weight_decay=args.weight_decay,
+        batch_size=args.batch_size, max_epoch=args.max_epoch,
+        log_file=args.log_file, output_model_file=args.output_model_file,
+        dataset_name=args.dataset, word_emb=word_emb, position_emb=position_emb)
+
+    """ old code (evaluate.py) that checks the model's correctness
     correct_counter = 0
 
     for index in tqdm(range(len(val_dataset))):        
@@ -153,7 +229,7 @@ def main():
                 exit(0)
 
     print(f'AC: {correct_counter} tests passed')
-
+    """
 
 if __name__ == '__main__':
     main()

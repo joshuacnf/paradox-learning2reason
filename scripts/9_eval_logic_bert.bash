@@ -1,1 +1,1 @@
-python logic_bert/evaluate.py --data_file logic_bert/test_examples.json --vocab_file sample/vocab.txt
+python logic_bert/evaluate.py --data_file DATA/RP/prop_examples.balanced_by_backward.max_6.json_val --vocab_file sample/vocab.txt
