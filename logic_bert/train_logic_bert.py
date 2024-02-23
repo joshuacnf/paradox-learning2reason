@@ -184,7 +184,7 @@ def train_model(model, train, valid, test,
             labels = labels.type(torch.FloatTensor)
 
             torch.log(y_batch)
-            torch.log(y_batch)
+            # torch.log(y_batch)
 
             # print(y_batch)
             # print(labels)
@@ -201,24 +201,24 @@ def train_model(model, train, valid, test,
             loss.backward()#back propogate (compute gradients)
             optimizer.step()#update parameters according to this batch's gradients
 
-            # debugging prints:
-            print_nonzero_params = False
-            print_gradients = False
+            # # debugging prints:
+            # print_nonzero_params = False
+            # print_gradients = False
 
-            if print_nonzero_params:
-                # show (nonzero) parameters (to see if they are like the times (a changin))
-                for name, param in model.named_parameters():
-                    if param.requires_grad:
-                        #print(name, param.data)#just print all the params
-                        nonzero_mask = torch.ne(param.data, 0)
-                        nonzero_entries = torch.masked_select(param.data, nonzero_mask)
-                        print(name, nonzero_entries.data)
+            # if print_nonzero_params:
+            #     # show (nonzero) parameters (to see if they are like the times (a changin))
+            #     for name, param in model.named_parameters():
+            #         if param.requires_grad:
+            #             #print(name, param.data)#just print all the params
+            #             nonzero_mask = torch.ne(param.data, 0)
+            #             nonzero_entries = torch.masked_select(param.data, nonzero_mask)
+            #             print(name, nonzero_entries.data)
 
-            if print_gradients:
-                # print gradients but only for the leaf nodes (where they should be stored after backward())
-                for name, param in model.named_parameters():
-                    if param.requires_grad and param.is_leaf:
-                        print(param.grad)
+            # if print_gradients:
+            #     # print gradients but only for the leaf nodes (where they should be stored after backward())
+            #     for name, param in model.named_parameters():
+            #         if param.requires_grad and param.is_leaf:
+            #             print(param.grad)
 
             print('Epoch {}, Batch Loss: {}'.format(epoch, loss.item()))
 

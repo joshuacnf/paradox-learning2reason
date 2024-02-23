@@ -342,7 +342,7 @@ class LogicBERT(nn.Module):
         super().__init__()
 
         self.parse_layer = ParseLayer()
-        reason_layers = [(str(i), ReasonLayer()) for i in range(8)]
+        reason_layers = [(str(i), ReasonLayer()) for i in range(8)]# was 11
         self.reason_layers = nn.Sequential(OrderedDict(reason_layers))
 
     def forward(self, input_states):
