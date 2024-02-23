@@ -86,7 +86,6 @@ def init():
     parser.add_argument('--max_cluster_size', default=10, type=int)
     parser.add_argument('--log_file', default='log.txt', type=str)
     parser.add_argument('--output_model_file', default='model.pt', type=str)
-    parser.add_argument('--max_rules', default=20, type=int)
     
     args = parser.parse_args()
 

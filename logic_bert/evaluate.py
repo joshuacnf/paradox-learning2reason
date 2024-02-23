@@ -11,7 +11,7 @@ from tqdm import tqdm
 from model import LogicBERT
 
 device = 'cpu'
-RULES_THRESHOLD = 60
+RULES_THRESHOLD = 5
 
 class LogicDataset(Dataset):
     def __init__(self, examples):
@@ -125,12 +125,14 @@ def main():
     args = init()
 
     val_dataset = LogicDataset.initialze_from_file(args.data_file)
+    print(len(val_dataset))
     
     vocab = read_vocab(args.vocab_file)
     word_emb = gen_word_embedding(vocab)
     position_emb = gen_position_embedding(1024)
 
-    model = LogicBERT()
+    #model = LogicBERT()
+    model = torch.load('/space/trzhao/paradox-learning2reason/OUTPUT/LP/LOGIC_BERT/model.pt')
     model.to(device)
 
     correct_counter = 0
@@ -148,9 +150,9 @@ def main():
 
             if (output[0, 255].item() > 0.5) == label:
                 correct_counter += 1                
-            else:
-                print('Wrong Answer!')
-                exit(0)
+            # else:
+                # print('Wrong Answer!')
+                # exit(0)
 
     print(f'AC: {correct_counter} tests passed')
 
