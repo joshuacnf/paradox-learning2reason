@@ -181,7 +181,7 @@ def train_model(model, train, valid, test,
             labels = labels.type(torch.FloatTensor)
 
             torch.log(y_batch)
-            torch.log(y_batch)
+            #torch.log(y_batch)
 
             # print(y_batch)
             # print(labels)
@@ -198,42 +198,53 @@ def train_model(model, train, valid, test,
             loss.backward()#back propogate (compute gradients)
             optimizer.step()#update parameters according to this batch's gradients
 
-            # debugging prints:
-            print_nonzero_params = False
-            print_gradients = False
+            ######### debugging prints:  ########################################################################## 
+            # print_nonzero_params = False
+            # print_gradients = False
 
-            if print_nonzero_params:
-                # show (nonzero) parameters (to see if they are like the times (a changin))
-                for name, param in model.named_parameters():
-                    if param.requires_grad:
-                        #print(name, param.data)#just print all the params
-                        nonzero_mask = torch.ne(param.data, 0)
-                        nonzero_entries = torch.masked_select(param.data, nonzero_mask)
-                        print(name, nonzero_entries.data)
+            # if print_nonzero_params:
+            #     # show (nonzero) parameters (to see if they are like the times (a changin))
+            #     for name, param in model.named_parameters():
+            #         if param.requires_grad:
+            #             #print(name, param.data)#just print all the params
+            #             nonzero_mask = torch.ne(param.data, 0)
+            #             nonzero_entries = torch.masked_select(param.data, nonzero_mask)
+            #             print(name, nonzero_entries.data)
 
-            if print_gradients:
-                # print gradients but only for the leaf nodes (where they should be stored after backward())
-                for name, param in model.named_parameters():
-                    if param.requires_grad and param.is_leaf:
-                        print(param.grad)
+            # if print_gradients:
+            #     # print gradients but only for the leaf nodes (where they should be stored after backward())
+            #     for name, param in model.named_parameters():
+            #         if param.requires_grad and param.is_leaf:
+            #             print(param.grad)
+            ##########################################################################
 
             print('Epoch {}, Batch Loss: {}'.format(epoch, loss.item()))
 
             batch_counter += 1
 
         # compute accuracy on train, valid and test
+        print('we are here 1')
         train_acc = evaluate(model, train_loader, word_emb, position_emb)
+        print('we are here 2')
         valid_acc = evaluate(model, valid_loader, word_emb, position_emb)
+        print('we are here 3')
         test_acc = evaluate(model, test_loader, word_emb, position_emb)
+        print('we are here 4')
 
         print('Epoch {}; train acc: {}; valid acc: {}; test acc: {}'.format(epoch, train_acc, valid_acc, test_acc))
 
+        
         with open(log_file, 'a+') as f:
             f.write('{} {} {} {}\n'.format(epoch, train_acc, valid_acc, test_acc))
+
+        print('we are here 5')
 
         if output_model_file != '':# and valid_ll > max_valid_ll:
             torch.save(model, output_model_file)
             #max_valid_ll = valid_ll
+
+        print('we are here 6')
+
 
 
 def evaluate(model, dataset_loader, word_emb, position_emb):

@@ -150,8 +150,8 @@ def test_model(model, test,
 
     print('test acc: {}'.format(test_acc))
 
-    with open(log_file, 'a+') as f:
-        f.write('{} {} {} {}\n'.format(test_acc))
+    # with open(log_file, 'a+') as f:
+    #     f.write('{} {} {} {}\n'.format(test_acc))
 
 
 def evaluate(model, dataset_loader, word_emb, position_emb):
