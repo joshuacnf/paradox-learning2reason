@@ -67,6 +67,7 @@ def init():
     parser.add_argument('--vocab_file', type=str, default='vocab.txt')
     parser.add_argument('--device', default='cuda', type=str)
     parser.add_argument('--cuda_core', default='0', type=str)
+    parser.add_argument('--log_file', default='log.txt', type=str)
 
     args = parser.parse_args()
 
@@ -153,7 +154,12 @@ def main():
             # else:
                 # print('Wrong Answer!')
                 # exit(0)
+    
+    test_acc = correct_counter / len(val_dataset)
 
+    with open(args.log_file, 'a+') as f:
+        f.write('{} \n'.format(test_acc))
+    
     print(f'AC: {correct_counter} tests passed')
 
 

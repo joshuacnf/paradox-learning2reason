@@ -76,15 +76,9 @@ def init():
     parser.add_argument('--cuda_core', default='0', type=str)
     
     # oliver added
-    parser.add_argument('--dataset_path', default='', type=str)
-    parser.add_argument('--dataset', default='', type=str) 
-    parser.add_argument('--max_epoch', default=20, type=int)
     parser.add_argument('--batch_size', default=8, type=int)
-    parser.add_argument('--lr', default=0.001, type=float)
-    parser.add_argument('--weight_decay', default=1.0, type=float)
     parser.add_argument('--max_cluster_size', default=10, type=int)
     parser.add_argument('--log_file', default='log.txt', type=str)
-    parser.add_argument('--output_model_file', default='model.pt', type=str)
     
     args = parser.parse_args()
 
@@ -140,9 +134,8 @@ def tokenize_and_embed(sentence, word_emb, position_emb):
     
 
 # based on PGC repo: pgc/train.py
-def test_model(model, test,
-                lr, weight_decay, batch_size, max_epoch,
-                log_file, output_model_file, dataset_name, word_emb, position_emb):
+def test_model(model, test, batch_size,
+                log_file, word_emb, position_emb):
     
     test_loader = DataLoader(dataset=test, batch_size=batch_size, shuffle=True)
 
@@ -153,8 +146,8 @@ def test_model(model, test,
 
     print('test acc: {}'.format(test_acc))
 
-    # with open(log_file, 'a+') as f:
-    #     f.write('{} {} {} {}\n'.format(test_acc))
+    with open(log_file, 'a+') as f:
+        f.write('{} \n'.format(test_acc))
 
 
 def evaluate(model, dataset_loader, word_emb, position_emb):
@@ -204,10 +197,8 @@ def main():
     #train, valid, test = load_data(args.dataset_path, args.dataset)
 
     test_model(model, test=test,
-        lr=args.lr, weight_decay=args.weight_decay,
-        batch_size=args.batch_size, max_epoch=args.max_epoch,
-        log_file=args.log_file, output_model_file=args.output_model_file,
-        dataset_name=args.dataset, word_emb=word_emb, position_emb=position_emb)
+        batch_size=args.batch_size,
+        log_file=args.log_file, word_emb=word_emb, position_emb=position_emb)
 
     """ old code (evaluate.py) that checks the model's correctness
     correct_counter = 0
